@@ -156,6 +156,11 @@ static unsigned int sslpsk_psk_client_callback(SSL* ssl,
     
     return ret;
 }
+#if PY_VERSION_BETWEEN(0x02070000, 0x03000000)
+#define IDENTITY_FORMAT "ls"
+#else
+#define IDENTITY_FORMAT "ly"
+#endif
 
 /*
  * Server callback for openSSL. Delegates to python_psk_server_callback.
@@ -181,7 +186,7 @@ static unsigned int sslpsk_psk_server_callback(SSL* ssl,
     }
 
     // Call python callback
-    result = PyObject_CallFunction(python_psk_server_callback, "ls", ssl_id(ssl), identity);
+    result = PyObject_CallFunction(python_psk_server_callback, IDENTITY_FORMAT, ssl_id(ssl), identity);
     if (result == NULL) {
 	goto release;
     }
